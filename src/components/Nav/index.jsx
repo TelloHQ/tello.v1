@@ -1,23 +1,11 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { useMoralis } from "react-moralis";
-import { useEffect } from "react";
-import { useState } from "react";
-
-let buttonText = "";
-
+import logo from "../../assets/img/tello.png";
 function Nav() {
-  const {
-    authenticate,
-    isAuthenticated,
-    isAuthenticating,
-    user,
-    logout,
-    account,
-    enableWeb3,
-    isWeb3Enabled,
-  } = useMoralis();
+  const { isAuthenticated, user, authenticate, logout } = useMoralis();
 
-  const [showModal, setShowModal] = useState(false);
+  let buttonText = useRef("Connect Wallet");
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -28,59 +16,80 @@ function Nav() {
 
     if (isAuthenticated) {
       let address = user.get("ethAddress");
-      console.log("Here ");
-      buttonText =
+
+      buttonText.current =
         address.substring(0, 5) +
         "...." +
         address.substring(address.length - 5, address.length);
-    } else {
-      buttonText = "Connect Wallet";
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
-  const handleLogout = () => {
-    authenticate(false);
+  const logOut = async (redirect = false) => {
+    if (isAuthenticated) {
+      logout();
+      buttonText.current = "Connect Wallet";
+    }
   };
 
-  const login = async () => {
+  const walletConnect = async () => {
     if (!isAuthenticated) {
       await authenticate({ signingMessage: "Welcome to Tello" })
         .then(function (user) {
-          window.location.href = "/signup";
-          // console.log("logged in user:", user);
-          console.log(user.get("ethAddress"));
+          if (user.get("email") === undefined) {
+            window.location.href = "/signup";
+          } else {
+            if (!user.get("email").length) {
+              window.location.href = "/signup";
+            } else {
+              window.location.href = "/dashboard";
+            }
+          }
         })
         .catch(function (error) {
           console.log(error);
-          window.location.href = "/";
         });
-    } else {
-      window.location.href = "/signup";
     }
   };
 
   return (
     <div className="nav relative ml-[30px] 2sm:ml-1 z-10">
       <div className="flex flex-row justify-between items-center px-14 pt-5 2sm:px-7">
-        <Link to="/" className="text-black text-2xl font-bold">
+        <NavLink to="/" className="flex items-center justify-center">
+          <img
+            src={logo}
+            alt="tello"
+            width={30}
+            className="mr-[5px] min-w-[30px]"
+          />
+          <span className="text-black text-2xl font-bold">TELLO</span>
+        </NavLink>
+        {/* <Link to="/" className="text-black text-2xl font-bold">
           TELLO
-        </Link>
+        </Link> */}
         <div className="text-black flex flex-row font-medium text-lg">
-          <Link to="about" className="text-black pr-4">
+          <div
+            onClick={() => {
+              document.querySelector("#about").scrollIntoView();
+            }}
+            className="text-black pr-4"
+          >
             About
-          </Link>
+          </div>
+          <NavLink to="/blog" className="text-black pl-4">
+            Blog
+          </NavLink>
         </div>
         <div className="right mmd:hidden">
           <button
-            onClick={login}
+            onClick={walletConnect}
             className="hover:bg-[#2D9CDB] transition-all delay-500 text-sm rounded-lg bg-[#3DB5E6] text-white font-semibold py-4 px-4"
           >
-            {buttonText}
+            {buttonText.current}
           </button>
           {isAuthenticated && (
             <button
-              onClick={handleLogout}
+              onClick={logOut}
               className="ml-2 hover:bg-[#2D9CDB] transition-all delay-500 text-sm rounded-lg bg-[#3DB5E6] text-white font-semibold py-4 px-4"
             >
               Logout

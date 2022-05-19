@@ -1,55 +1,175 @@
+import { useState } from "react";
+import { useMoralis } from "react-moralis";
+import { MdVisibilityOff, MdVisibility } from "react-icons/md";
+import {
+  TextField,
+  Box,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  FormControl,
+  OutlinedInput,
+  Button,
+  InputAdornment,
+  Alert,
+} from "@mui/material";
 import Nav from "../../components/Nav";
 const LoginForm = () => {
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
+  const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const { isAuthenticated, Moralis } = useMoralis();
+  const [viewPass, setViewPass] = useState(false);
+
+  const submitForm = async () => {
+    if (!isAuthenticated) {
+      window.scrollTo(0, 0);
+      setLoading(true);
+      let more = true;
+      [user, pass].forEach((val) => {
+        if (!val.length) {
+          setError("Password or username incorrect");
+          setLoading(false);
+          more = false;
+          return;
+        }
+      });
+
+      if (more) {
+        if (pass.length < 6) {
+          setError("Password or username incorrect");
+          setLoading(false);
+        }
+      }
+
+      if (!error.length) {
+        if (!isAuthenticated) {
+          try {
+            await Moralis.User.logIn(user, pass, {
+              usePost: true,
+            });
+          } catch (err) {
+            setError(err.message);
+            setLoading(false);
+            return;
+          }
+        }
+        window.location.href = "/dashboard";
+      }
+    } else {
+      window.location.href = "/dashboard";
+    }
+  };
+
   return (
     <div>
       <Nav />
-      <form>
+      <form
+        action=""
+        method="POST"
+        enctype="multipart/form-data"
+        onSubmit={(c) => {
+          c.preventDefault();
+          submitForm();
+        }}
+      >
         <div className="w-full flex justify-center mt-8">
           <div className="flex flex-col w-[900px] mx-7 items-center justify-center">
-            <div className="flex flex-row border-b border-[#1B1C31] justify-start w-full">
-              <div className="text-[#1B1C31] font-semibold text-xl py-4">
+            <div className="flex flex-row border-b border-[#3DB5E6] justify-start w-full">
+              <div className="text-[#3DB5E6] font-semibold text-xl py-4">
                 Login
               </div>
             </div>
+            {isLoading && (
+              <Box className="text-[#3DB5E6]" sx={{ width: "100%" }}>
+                <LinearProgress color="inherit" />
+              </Box>
+            )}
 
+            {error.length > 0 && <Alert severity="error">{error}</Alert>}
             <div className="username w-full">
               <div className="mt-8">
                 <div name="inputName" className="rounded-md">
                   <div className="flex">
-                    <div className="uppercase absolute max-w-[122px] px-3 py-4 font-bold text-sm sm:text-sm sm:leading-5 focus:outline-none focus:shadow-outline-blue focus:border-[#1B1C31]">
-                      <label htmlFor="username">Username</label>
-                    </div>
-
-                    <input
-                      className="rounded-lg border p-3 w-full pl-[122px] focus:outline-none focus:shadow-outline-blue focus:border-[#1B1C31] text-[#1B1C31] placeholder-blue-900"
-                      placeholder="vitalik.eth"
-                      type="text"
+                    <TextField
+                      label={"Username"}
+                      value={user}
+                      fullWidth
+                      placeholder="wagmi.eth"
                       name="username"
+                      onChange={(e) => {
+                        setError("");
+                        setUser(e.target.value);
+                      }}
                     />
                   </div>
                 </div>
 
                 <div name="inputDescription" className="rounded-md mt-8">
                   <div className="flex">
-                    <div className="uppercase absolute px-3 py-4 max-w-[122px] font-bold text-sm sm:text-sm sm:leading-5 focus:outline-none focus:shadow-outline-blue focus:border-[#1B1C31]">
-                      <label htmlFor="pass">Password</label>
-                    </div>
-
-                    <input
-                      className="rounded-lg border pl-[122px] p-3 w-full focus:outline-none focus:shadow-outline-blue focus:border-[#1B1C31] text-[#1B1C31] placeholder-blue-900"
-                      placeholder="I created Ethereum"
-                      type="password"
-                      name="pass"
+                    <TextField
+                      label={"Password"}
+                      value={pass}
+                      fullWidth
+                      placeholder="******"
+                      name="password"
+                      onChange={(e) => {
+                        setError("");
+                        setPass(e.target.value);
+                      }}
                     />
+                    <FormControl
+                      sx={{
+                        width: "100%",
+                      }}
+                      variant="outlined"
+                    >
+                      <InputLabel htmlFor="password">Password</InputLabel>
+                      <OutlinedInput
+                        id="password"
+                        type={viewPass ? "text" : "password"}
+                        value={pass}
+                        onChange={(e) => {
+                          setPass(e.target.value);
+                          setError("");
+                        }}
+                        endAdornment={
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label="toggle password visibility"
+                              onClick={() => setViewPass(!viewPass)}
+                              onMouseDown={(event) => {
+                                event.preventDefault();
+                              }}
+                              edge="end"
+                            >
+                              {viewPass ? (
+                                <MdVisibilityOff />
+                              ) : (
+                                <MdVisibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        }
+                        label="Password"
+                        placeholder="******"
+                      />
+                    </FormControl>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-row justify-center w-full mt-8">
-              <button className="hover:bg-[#2D9CDB] transition-all delay-500 text-sm rounded-lg bg-[#3DB5E6] text-white font-semibold py-4 px-10">
-                Connect Wallet
-              </button>
+              <Button
+                type="submit"
+                variant="contained"
+                className="!text-sm !rounded-lg !bg-[#3DB5E6] !text-white !font-semibold !py-4 !px-10"
+              >
+                {isAuthenticated ? "Save" : "Connect Wallet"}
+              </Button>
             </div>
           </div>
         </div>

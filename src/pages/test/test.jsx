@@ -1,39 +1,35 @@
-import { useMoralis } from "react-moralis";
+import Alert from "@mui/material/Alert";
+import { useMoralis, useWeb3Transfer, Moralis } from "react-moralis";
 
-const Tester = () => {
-  const { authenticate, isAuthenticated, user } = useMoralis();
+const TransferEth = () => {
+  const { Moralis, enableWeb3 } = useMoralis();
+  function enable() {
+    Moralis.enableWeb3();
+  }
+    
+  const { fetch, error, isFetching } = useWeb3Transfer({
+    type: "native",
+    amount: Moralis.Units.ETH(0.001),
+    receiver: "0x1De0d1DA1531C741bB2bc8dFe6dfCbFaB530A20A",
+  });
 
-  const login = async () => {
-    if (!isAuthenticated) {
-      await authenticate({
-        provider: "walletconnect",
-        mobileLinks: [
-          "rainbow",
-          "metamask",
-          "argent",
-          "trust",
-          "imtoken",
-          "pillar",
-        ],
-      })
-        .then(function (user) {
-          console.log(user.get("ethAddress"));
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-    }
-  };
+  console.log(error)
+
   return (
+    // Use your custom error component to show errors
     <div>
-      <button
-        onClick={login}
-        className="hover:bg-[#2D9CDB] transition-all delay-500 text-sm rounded-lg bg-[#3DB5E6] text-white font-semibold py-4 px-4"
-      >
-        Login
+      {/* {error && (
+        // <Alert severity="error" error={error}>
+        //   {error}
+        // </Alert>
+        <div>{error}</div>
+      )} */}
+      <button onClick={enable}>Auth</button>
+      <button onClick={() => fetch()} disabled={isFetching}>
+        Transfer
       </button>
     </div>
   );
 };
 
-export default Tester;
+export default TransferEth;

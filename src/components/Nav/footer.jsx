@@ -12,6 +12,7 @@ const Footer = () => {
   useEffect(() => {
     if (isAuthenticated) {
       console.log("Logged in user:", user.get("ethAddress"));
+      console.log(user);
     } else {
       console.log("Not logged in");
     }
@@ -24,6 +25,7 @@ const Footer = () => {
         .then(function (user) {
           window.location.href = "/signup";
           console.log("logged in user:", user);
+
           console.log(user.get("ethAddress"));
         })
         .catch(function (error) {
@@ -37,7 +39,7 @@ const Footer = () => {
 
   return (
     <div>
-      <div className="flex mx-[70px] border-solid border-b-[#E5E5EA] border-b-[1px] w-auto p-5 justify-between pb-12">
+      <div className="flex mx-[70px] md:mx-5 mmd:mx-[10px] border-solid border-b-[#E5E5EA] border-b-[1px] w-auto p-5 justify-between pb-12">
         <div className="w-[220px]">
           <h3 className="font-bold text-[18px] mb-2">Tello</h3>
           <span className="text-[#757095] ">
@@ -115,7 +117,7 @@ const Footer = () => {
         </div>
       </div>
       <div className="text-center font-semibold py-5">
-        Copyright @ Tello {date.getFullYear()}. All Rights Reserved.
+        Copyright &copy; Tello {date.getFullYear()}. All Rights Reserved.
       </div>
     </div>
   );
