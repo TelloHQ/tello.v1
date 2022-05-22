@@ -1,13 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Route, Navigate, Routes } from "react-router-dom";
 import Blog from "./pages/blog";
 import Home from "./pages/Home";
 import { useEffect, useState } from "react";
 import Signup from "./pages/auth/signup";
 import Dash from "./pages/dashboard";
-import DashSettings from "./pages/dashboard/settings";
 import Loader from "./components/loader";
 import Notfound from "./pages/error/404";
 import LoginForm from "./pages/auth/login";
+import Test from "./pages/test";
 import UserPage from "./pages/user";
 import { useMoralis } from "react-moralis";
 const App = () => {
@@ -20,12 +20,17 @@ const App = () => {
   }, [isInitializing]);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
-        <Route path="/" element={loading ? <Loader /> : <Home />} />
-        <Route path="/blog" element={loading ? <Loader /> : <Blog />} />
-        <Route path="/signup" element={loading ? <Loader /> : <Signup />} />
+        <Route exact path="/" element={loading ? <Loader /> : <Home />} />
+        <Route exact path="/blog" element={loading ? <Loader /> : <Blog />} />
         <Route
+          exact
+          path="/signup"
+          element={loading ? <Loader /> : <Signup />}
+        />
+        <Route
+          exact
           path="/login"
           element={
             loading ? (
@@ -38,6 +43,7 @@ const App = () => {
           }
         />
         <Route
+          exact
           path="/dashboard"
           element={
             loading ? (
@@ -45,16 +51,30 @@ const App = () => {
             ) : isAuthenticated ? (
               <Dash />
             ) : (
-              <Navigate to="/" />
+              <Navigate to="/login" />
             )
           }
         />
-        <Route path="/dashboard/settings" element={loading ? <Loader /> : <DashSettings />} />
-        {/* <Route path="/user/:id" element={loading ? <Loader /> : <UserPage />} /> */}
-        <Route path="/user" element={loading ? <Loader /> : <UserPage />} />
+        <Route
+          exact
+          path="/dashboard/:page"
+          element={
+            loading ? (
+              <Loader />
+            ) : isAuthenticated ? (
+              <Dash />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+
+        <Route path="/user/:username" element={<UserPage />} />
+        <Route path="/test" element={loading ? <Loader /> : <Test />} />
+
         <Route path="*" element={loading ? <Loader /> : <Notfound />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 

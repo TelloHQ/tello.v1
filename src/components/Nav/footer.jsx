@@ -23,7 +23,7 @@ const Footer = () => {
     if (!isAuthenticated) {
       await authenticate({ signingMessage: "Welcome to Tello" })
         .then(function (user) {
-          window.location.href = "/signup";
+          window.location.href = "/#/signup";
           console.log("logged in user:", user);
 
           console.log(user.get("ethAddress"));
@@ -33,7 +33,7 @@ const Footer = () => {
           window.location.href = "/";
         });
     } else {
-      window.location.href = "/signup";
+      window.location.href = "/#/signup";
     }
   };
 

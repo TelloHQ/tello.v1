@@ -124,7 +124,7 @@ const SignupForm = () => {
           <div className="flex flex-row border-b border-[#3DB5E6] justify-start w-full">
             <div className="text-[#3DB5E6] flex items-center justify-between font-semibold py-4 w-full">
               <span className="text-xl">Signup</span>
-              <Link href="\login" className="ml-2">
+              <Link href="\#/login" className="ml-2">
                 I have an account
               </Link>
             </div>

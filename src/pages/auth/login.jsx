@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMoralis } from "react-moralis";
 import { MdVisibilityOff, MdVisibility } from "react-icons/md";
 import {
@@ -20,8 +20,24 @@ const LoginForm = () => {
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { isAuthenticated, Moralis } = useMoralis();
+  const {
+    isAuthenticated,
+    isAuthenticating,
+    Moralis,
+    isWeb3Enabled,
+    enableWeb3,
+    chainId,
+    isWeb3EnableLoading,
+  } = useMoralis();
   const [viewPass, setViewPass] = useState(false);
+
+  useEffect(() => {
+    if (!isWeb3Enabled) {
+      enableWeb3();
+    }
+  }, []);
+
+  console.log(chainId);
 
   const submitForm = async () => {
     if (!isAuthenticated) {
@@ -47,19 +63,28 @@ const LoginForm = () => {
       if (!error.length) {
         if (!isAuthenticated) {
           try {
-            await Moralis.User.logIn(user, pass, {
+            Moralis.User.logIn(user, pass, {
               usePost: true,
-            });
+            })
+              .then((req) => {
+                window.location.reload();
+              })
+              .catch((err) => {
+                setError(err.message);
+                setLoading(false);
+                return;
+              });
           } catch (err) {
             setError(err.message);
             setLoading(false);
             return;
           }
+        } else {
+          window.location.href = "/#/dashboard";
         }
-        window.location.href = "/dashboard";
       }
     } else {
-      window.location.href = "/dashboard";
+      window.location.href = "/#/dashboard";
     }
   };
 
@@ -69,7 +94,7 @@ const LoginForm = () => {
       <form
         action=""
         method="POST"
-        enctype="multipart/form-data"
+        encType="multipart/form-data"
         onSubmit={(c) => {
           c.preventDefault();
           submitForm();
@@ -109,17 +134,6 @@ const LoginForm = () => {
 
                 <div name="inputDescription" className="rounded-md mt-8">
                   <div className="flex">
-                    <TextField
-                      label={"Password"}
-                      value={pass}
-                      fullWidth
-                      placeholder="******"
-                      name="password"
-                      onChange={(e) => {
-                        setError("");
-                        setPass(e.target.value);
-                      }}
-                    />
                     <FormControl
                       sx={{
                         width: "100%",

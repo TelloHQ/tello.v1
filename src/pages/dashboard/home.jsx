@@ -25,16 +25,19 @@ import { useMoralis, useWeb3Transfer } from "react-moralis";
 import { data } from "autoprefixer";
 
 const DashHome = () => {
-  const { user, Moralis, isWeb3Enabled, enableWeb3 } = useMoralis();
+  const { user, Moralis, web3, isWeb3Enabled, enableWeb3, chainId } =
+    useMoralis();
   const userAddress = user.get("ethAddress");
   // console.log(userAddress);
 
   const [amount, setAmount] = useState(0);
   const [receiver, setReceiver] = useState("");
 
-  if (!isWeb3Enabled) {
-    enableWeb3();
-  }
+  useEffect(() => {
+    if (!isWeb3Enabled) {
+      enableWeb3();
+    }
+  }, []);
 
   const {
     fetch: fetched,
@@ -42,7 +45,7 @@ const DashHome = () => {
     isFetching,
   } = useWeb3Transfer({
     type: "native",
-    amount: Moralis.Units.ETH(amount),
+    amount: Moralis.Units.ETH(parseFloat(amount)),
     receiver: receiver,
   });
 
@@ -56,7 +59,9 @@ const DashHome = () => {
       setWData(data.data);
     });
 
-  // console.log(wdata)
+  // console.log(web3.currentProvider.chainId);
+
+  console.log(wdata);
 
   const balance = [{ amt: 2400 }, { amt: 500 }, { amt: 1400 }, { amt: 3000 }];
   const received = [{ amt: 2400 }, { amt: 500 }, { amt: 1400 }, { amt: 3000 }];
@@ -285,7 +290,7 @@ const DashHome = () => {
                   value={amount}
                   onChange={(e) => {
                     const val = e.target.value;
-                    setAmount(val);
+                    setAmount(val.replace(/[^\d.]/g, ""));
                   }}
                   className="amount"
                   id="Amount"
@@ -496,8 +501,8 @@ const DashHome = () => {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row, id) => {
                     return (
-                      <Fragment>
-                        <TableRow role="checkbox" tabIndex={-1} key={id}>
+                      <Fragment key={id}>
+                        <TableRow role="checkbox" tabIndex={-1}>
                           {columns.map((column, idd) => {
                             const value = row[column.id];
                             return (

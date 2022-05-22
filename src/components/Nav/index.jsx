@@ -37,12 +37,12 @@ function Nav() {
       await authenticate({ signingMessage: "Welcome to Tello" })
         .then(function (user) {
           if (user.get("email") === undefined) {
-            window.location.href = "/signup";
+            window.location.href = "/#/signup";
           } else {
             if (!user.get("email").length) {
-              window.location.href = "/signup";
+              window.location.href = "/#/signup";
             } else {
-              window.location.href = "/dashboard";
+              window.location.href = "/#/dashboard";
             }
           }
         })
