@@ -15,9 +15,19 @@ import {
   Box,
   Alert,
 } from "@mui/material";
+import { Navigate } from "react-router-dom";
 
 const SignupForm = () => {
-  const { isAuthenticated, user, authenticate, Moralis } = useMoralis();
+  const {
+    isAuthenticated,
+    user,
+    authenticate,
+    Moralis,
+    isWeb3Enabled,
+    enableWeb3,
+    chainId,
+    isWeb3EnableLoading,
+  } = useMoralis();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -27,6 +37,14 @@ const SignupForm = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isWeb3Enabled) {
+      enableWeb3();
+    }
+  }, []);
+
+  console.log(chainId);
 
   const [userLink, setUserLink] = useState("");
   const [userDescription, setUserDescription] = useState("");
@@ -65,10 +83,12 @@ const SignupForm = () => {
 
     if (!error.length) {
       if (!isAuthenticated) {
-        await authenticate({ signingMessage: "Welcome to Tello" })
+        await authenticate({ signingMessage: "Welcome to Cryptea" })
           .then(function (user) {
-            if (user.get("email").length) {
-              window.location.href = "/dashboard";
+            if (user.get("email") !== undefined) {
+              if (user.get("email").length) {
+                window.location.href = "/#/dashboard";
+              }
             }
           })
           .catch(function (error) {
@@ -79,7 +99,7 @@ const SignupForm = () => {
           });
       }
 
-      if (!user.get("email").length) {
+      if (user.get("email") === undefined) {
         user.set("username", userInfo);
         user.set("desc", userDescription);
         user.setPassword(pass);
@@ -87,7 +107,7 @@ const SignupForm = () => {
 
         const Links = Moralis.Object.extend("link");
         const link = new Links();
-        link.set("link", userLink.length ? userLink : userInfo);
+        link.set("link", (userLink.length ? userLink : userInfo).toLowerCase());
         link.set("amount", "variable");
         link.set("user", user);
 
@@ -101,7 +121,7 @@ const SignupForm = () => {
           return;
         }
 
-        window.location.href = "/dashboard";
+        window.location.href = "/#/dashboard";
       } else {
         setError("Logout of your current wallet to sign up");
         setLoading(false);
@@ -117,14 +137,14 @@ const SignupForm = () => {
       }}
       method="POST"
       action="#"
-      entype="multipart/form-data"
+      encType="multipart/form-data"
     >
       <div className="w-full flex justify-center mt-8">
         <div className="flex flex-col w-[900px] mx-7 items-center justify-center">
           <div className="flex flex-row border-b border-[#3DB5E6] justify-start w-full">
             <div className="text-[#3DB5E6] flex items-center justify-between font-semibold py-4 w-full">
               <span className="text-xl">Signup</span>
-              <Link href="\#/login" className="ml-2">
+              <Link href="\login" className="ml-2">
                 I have an account
               </Link>
             </div>
@@ -272,11 +292,11 @@ const SignupForm = () => {
           </div>
           <div className="rounded-[5px] border-[#C2C7D6] mt-8 w-full border-2 border-solid overflow-hidden">
             <div className="flex flex-wrap items-center px-7 justify-between py-4 bg-[#3DB5E6] text-white">
-              <span className="uppercase font-semibold mr-3">Tello Link</span>
+              <span className="uppercase font-semibold mr-3">Cryptea Link</span>
               <div className="flex items-center">
                 <span className="mr-2 text-sm">
                   This is the link which enables other crypto enthusiasts tip
-                  you. E.g Tello.com/wagmi <br />
+                  you. E.g cryptea.com/wagmi <br />
                   If left empty your username is used as default link
                 </span>
                 <MdInfo size={20} color="#fff" />
